@@ -10,6 +10,7 @@ import { initTOC } from './toc.js';
 import { initModals } from './modals.js';
 import { initServicesLine } from './services-line.js';
 import { initServicesEnhanced } from './services-enhanced.js';
+import { initFAQ } from './faq.js';
 
 const init = () => {
     // Only wait for core dependencies (GSAP, jQuery)
@@ -34,6 +35,7 @@ const init = () => {
     initModals();
     initServicesLine();
     initServicesEnhanced();
+    initFAQ();
 };
 
 if (document.readyState === 'loading') {

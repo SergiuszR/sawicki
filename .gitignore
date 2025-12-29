@@ -24,7 +24,6 @@ Thumbs.db
 
 # Dependencies and Build
 node_modules/
-dist/
 build/
 .cache/
 .npm

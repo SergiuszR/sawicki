@@ -12,15 +12,19 @@ import { initServicesLine } from './services-line.js';
 import { initServicesEnhanced } from './services-enhanced.js';
 
 const init = () => {
-    // Ensure GSAP is loaded
-    const mm = (typeof gsap !== 'undefined') ? gsap.matchMedia() : null;
+    // Ensure Dependencies are loaded
+    if (typeof gsap === 'undefined' || typeof $ === 'undefined') {
+        // If not ready, retry in 100ms
+        setTimeout(init, 100);
+        return;
+    }
+
+    const mm = gsap.matchMedia();
 
     // Initialize all modules
     initNavigation();
-    if (mm) {
-        initSliders(mm);
-        initAnimations(mm);
-    }
+    initSliders(mm);
+    initAnimations(mm); // Now safe to run as GSAP is confirmed
     initUtilities();
     
     // Initialize standalone modules

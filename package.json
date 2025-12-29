@@ -5,8 +5,8 @@
   "main": "src/main.js",
   "scripts": {
     "lint": "eslint src/**.js",
-    "build": "npm run lint && esbuild src/main.js --bundle --outfile=dist/total.js --minify",
-    "dev": "npm run lint && esbuild src/main.js --bundle --outfile=dist/total.js --servedir=dist"
+    "build": "npm run lint && esbuild src/main.js --bundle --outfile=dist/main.js --minify",
+    "dev": "npm run lint && esbuild src/main.js --bundle --outfile=dist/main.js --servedir=dist"
   },
   "devDependencies": {
     "esbuild": "^0.19.0",

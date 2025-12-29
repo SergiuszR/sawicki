@@ -1,11 +1,16 @@
 import { CONFIG } from './config.js';
 
 export function initAnimations(mm) {
-  // 1. Desktop Expand
+  // 1. Desktop Expand - matches width of [data-usp] element
   mm.add(CONFIG.breakpoints.desktop, () => {
+    const $usp = $('[data-usp]');
+    if (!$usp.length) return;
+    
+    const targetWidth = $usp.outerWidth();
+    
     $('[data-expand]').each(function () {
       gsap.to(this, {
-        width: '30rem', duration: CONFIG.animationDuration, ease: 'power3.out',
+        width: targetWidth, duration: CONFIG.animationDuration, ease: 'power3.out',
         scrollTrigger: { trigger: this, start: 'top 80%', toggleActions: 'play none none none' }
       });
     });

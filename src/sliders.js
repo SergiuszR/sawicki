@@ -64,18 +64,26 @@ function initTestimonialLoop(mm) {
     const $cols = [0, 1, 2].map(() => $('<div class="testi-col">').appendTo($wrapper));
     $items.each((i, el) => $cols[i % 3].append(el));
 
+    // Store tweens for pause/resume
+    const tweens = [];
+
     $cols.forEach(($col, i) => {
       $col.append($col.children().clone(true));
       const isMiddle = i === 1;
       if (isMiddle) gsap.set($col, { yPercent: -50 });
 
-      gsap.to($col, {
+      const tween = gsap.to($col, {
         yPercent: isMiddle ? 0 : -50,
         ease: 'none',
         duration: CONFIG.marqueeSpeed,
         repeat: -1,
       });
+      tweens.push(tween);
     });
+
+    // Pause on hover, resume on leave
+    $wrapper.on('mouseenter', () => tweens.forEach(t => t.pause()));
+    $wrapper.on('mouseleave', () => tweens.forEach(t => t.resume()));
   });
 
   // Mobile: Horizontal auto-scrolling marquee
@@ -109,7 +117,7 @@ function initTestimonialLoop(mm) {
     const totalWidth = itemWidth * itemCount;
 
     // Animate horizontal scroll
-    gsap.to($wrapper.children(), {
+    const tween = gsap.to($wrapper.children(), {
       x: -totalWidth,
       duration: itemCount * 6, // 6 seconds per item
       ease: 'none',
@@ -118,6 +126,10 @@ function initTestimonialLoop(mm) {
         x: gsap.utils.unitize(x => parseFloat(x) % totalWidth)
       }
     });
+
+    // Pause on hover/touch, resume on leave
+    $wrapper.on('mouseenter touchstart', () => tween.pause());
+    $wrapper.on('mouseleave touchend', () => tween.resume());
   });
 }
 

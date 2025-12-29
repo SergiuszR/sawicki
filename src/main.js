@@ -11,7 +11,7 @@ import { initModals } from './modals.js';
 import { initServicesLine } from './services-line.js';
 import { initServicesEnhanced } from './services-enhanced.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+const init = () => {
     // Ensure GSAP is loaded
     const mm = (typeof gsap !== 'undefined') ? gsap.matchMedia() : null;
 
@@ -28,4 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initModals();
     initServicesLine();
     initServicesEnhanced();
-});
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}

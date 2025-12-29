@@ -9,6 +9,9 @@ export function initSliders(mm) {
 }
 
 function initMainSwiper() {
+  // Guard: Swiper may not be loaded on all pages
+  if (typeof Swiper === 'undefined') return;
+  
   const selector = '.swiper';
   const el = document.querySelector(selector);
   if (!el) return;

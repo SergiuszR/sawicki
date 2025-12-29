@@ -31,36 +31,6 @@ export function initAnimations(mm) {
     });
   });
 
-  // 4. Mobile Marquee & Reload
-  mm.add(CONFIG.breakpoints.mobile, () => {
-    // Vertical Reload
-    const $reloadItems = $('[data-reload]').children();
-    if ($reloadItems.length) {
-      gsap.set($reloadItems, { position: 'absolute', top: '3em', left: 0, right: 0, width: '100%', display: 'none' });
-      gsap.set($reloadItems.eq(0), { top: '0em', display: 'flex' });
-      const reloadTl = gsap.timeline({ repeat: -1 });
-      $reloadItems.each(function (i) {
-        const $curr = $(this), $next = $reloadItems.eq((i + 1) % $reloadItems.length);
-        reloadTl.to($curr, { top: '-3em', duration: 1.2, ease: 'power3.inOut' }, `+=2.5`)
-            .set($next, { display: 'flex', top: '3em' }, '<')
-            .to($next, { top: '0em', duration: 1.2, ease: 'power3.inOut' }, '<')
-            .set($curr, { display: 'none', top: '3em' });
-      });
-    }
-
-    // Horizontal Marquee
-    const $marqueeWrapper = $('[data-grid]');
-    const $marqueeItems = $marqueeWrapper.children();
-    if ($marqueeItems.length) {
-      gsap.set($marqueeWrapper, { display: 'flex', overflow: 'hidden', width: '100%' });
-      gsap.set($marqueeItems, { flex: '0 0 100%', width: '100%' });
-      const totalWidth = $marqueeItems.length * 100;
-      gsap.to($marqueeItems, {
-        xPercent: `-=${totalWidth}`, duration: CONFIG.marqueeSpeed, ease: 'none', repeat: -1,
-        modifiers: { xPercent: gsap.utils.unitize(x => parseFloat(x) % totalWidth) }
-      });
-    }
-  });
 
   // 5. Footer Logo
   const $logo = $('#footer-logo');

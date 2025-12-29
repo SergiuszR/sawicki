@@ -46,6 +46,7 @@ function initMainSwiper() {
 }
 
 function initTestimonialLoop(mm) {
+  // Tablet and Desktop: 3 columns, 65vh height
   mm.add(CONFIG.breakpoints.tabletUp, () => {
     const $wrapper = $('[data-testimonials]');
     if (!$wrapper.length) return;
@@ -74,6 +75,48 @@ function initTestimonialLoop(mm) {
         duration: CONFIG.marqueeSpeed,
         repeat: -1,
       });
+    });
+  });
+
+  // Mobile: Horizontal auto-scrolling marquee
+  mm.add(CONFIG.breakpoints.mobile, () => {
+    const $wrapper = $('[data-testimonials]');
+    if (!$wrapper.length) return;
+
+    const $items = $wrapper.children();
+    if ($items.length < 2) return;
+
+    // Set up wrapper as horizontal scroll container
+    $wrapper.css({
+      display: 'flex',
+      flexWrap: 'nowrap',
+      overflow: 'hidden',
+      gap: '1rem',
+    });
+
+    // Set items to fixed width
+    $items.css({
+      flex: '0 0 85%',
+      maxWidth: '85%',
+    });
+
+    // Clone items for seamless loop
+    $items.clone().appendTo($wrapper);
+
+    // Calculate total width of all items
+    const itemCount = $items.length;
+    const itemWidth = $items.eq(0).outerWidth(true);
+    const totalWidth = itemWidth * itemCount;
+
+    // Animate horizontal scroll
+    gsap.to($wrapper.children(), {
+      x: -totalWidth,
+      duration: itemCount * 6, // 6 seconds per item
+      ease: 'none',
+      repeat: -1,
+      modifiers: {
+        x: gsap.utils.unitize(x => parseFloat(x) % totalWidth)
+      }
     });
   });
 }

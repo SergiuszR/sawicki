@@ -26,8 +26,11 @@ export function initNavigation() {
       gsap.set($nav, { yPercent: 0 });
       $nav.removeClass('is-pinned');
       
-      // Only toggle button if NOT in white variant mode
-      if (!isWhiteVariant && $btn.length) {
+      // Only toggle button if NOT in white variant mode AND menu is NOT open
+      const $menu = $nav.find('.w-nav-menu');
+      const isMenuOpen = $menu.hasClass('w--open');
+      
+      if (!isWhiteVariant && $btn.length && !isMenuOpen) {
         $btn.removeClass('variant-3').addClass('variant-4');
       }
       return;
@@ -60,4 +63,34 @@ export function initNavigation() {
 
     LAST_SCROLL = currentScroll;
   });
+
+  // Mobile Menu: Watch for menu open/close to toggle button variant
+  // Webflow adds 'w--open' to the hamburger button (.w-nav-button), not the menu
+  const $hamburger = $nav.find('.w-nav-button');
+  console.log('[SAW Nav] Hamburger element found:', $hamburger.length > 0);
+  console.log('[SAW Nav] CTA Button element found:', $btn.length > 0);
+  console.log('[SAW Nav] isWhiteVariant:', isWhiteVariant);
+  
+  if ($hamburger.length && $btn.length && !isWhiteVariant) {
+    const menuObserver = new MutationObserver(() => {
+      console.log('[SAW Nav] Hamburger class changed');
+      
+      // Only apply on mobile
+      if (window.innerWidth >= 992) return;
+      
+      const isMenuOpen = $hamburger.hasClass('w--open');
+      console.log('[SAW Nav] Menu open:', isMenuOpen);
+      
+      if (isMenuOpen) {
+        $btn.removeClass('variant-4').addClass('variant-3');
+        console.log('[SAW Nav] Switched to variant-3');
+      } else {
+        $btn.removeClass('variant-3').addClass('variant-4');
+        console.log('[SAW Nav] Switched to variant-4');
+      }
+    });
+    
+    menuObserver.observe($hamburger[0], { attributes: true, attributeFilter: ['class'] });
+    console.log('[SAW Nav] Hamburger observer started');
+  }
 }

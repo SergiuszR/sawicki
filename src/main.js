@@ -34,7 +34,7 @@ const init = () => {
     initTOC();
     initModals();
     initServicesLine();
-    initServicesEnhanced();
+    // initServicesEnhanced(); // Duplicate logic removed
     initFAQ();
 };
 

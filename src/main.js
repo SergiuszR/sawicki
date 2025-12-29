@@ -12,8 +12,8 @@ import { initServicesLine } from './services-line.js';
 import { initServicesEnhanced } from './services-enhanced.js';
 
 const init = () => {
-    // Ensure Dependencies are loaded
-    if (typeof gsap === 'undefined' || typeof $ === 'undefined') {
+    // Ensure all dependencies are loaded (GSAP, jQuery, Swiper, SplitText)
+    if (typeof gsap === 'undefined' || typeof $ === 'undefined' || typeof Swiper === 'undefined' || typeof SplitText === 'undefined') {
         // If not ready, retry in 100ms
         setTimeout(init, 100);
         return;

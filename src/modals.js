@@ -3,7 +3,7 @@ export function initModals() {
   const triggers = document.querySelectorAll('[data-list]');
   const wrapper = document.querySelector('[data-modal-wrapper]');
   const allModals = document.querySelectorAll('[data-modal]');
-  const closeButtons = document.querySelectorAll('.modal_close-button');
+  // const closeButtons = document.querySelectorAll('.modal_close-button'); // Removed/Unused
   
   // Helper: Close logic
   const closeWrapper = () => {
@@ -47,11 +47,22 @@ export function initModals() {
   });
 
   // 2. Close Actions
-  closeButtons.forEach(btn => {
-    btn.addEventListener('click', (e) => {
+  // 2. Global Close Actions (Event Delegation)
+  document.addEventListener('click', (e) => {
+    // Check if clicked element is (or is inside) a close trigger
+    const closeBtn = e.target.closest('[data-modal-close], .modal_close-button');
+    
+    // Close if button clicked OR if clicked outside wrapper content (optional, but standard)
+    // For now, adhere to user request about close elements
+    if (closeBtn) {
       e.preventDefault();
       closeWrapper();
-    });
+    }
+    
+    // Optional: Close on backdrop click (if wrapper itself is the backdrop)
+    if (e.target === wrapper) {
+      closeWrapper();
+    }
   });
 
   document.addEventListener('keydown', (e) => {

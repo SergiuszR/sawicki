@@ -46,12 +46,32 @@ function initMainSwiper() {
 }
 
 function initTestimonialLoop(mm) {
-  // Tablet and Desktop: 3 columns, 65vh height
-  mm.add(CONFIG.breakpoints.tabletUp, () => {
-    const $wrapper = $('[data-testimonials]');
-    if (!$wrapper.length) return;
+  const wrapper = document.querySelector('[data-testimonials]');
+  if (!wrapper) return;
 
+  // Store original HTML to restore when switching breakpoints
+  const originalHTML = wrapper.innerHTML;
+  const originalStyles = wrapper.getAttribute('style') || '';
+  let swiperInstance = null;
+
+  // Helper to reset to original state
+  const resetToOriginal = () => {
+    if (swiperInstance) {
+      swiperInstance.destroy(true, true);
+      swiperInstance = null;
+    }
+    wrapper.innerHTML = originalHTML;
+    wrapper.setAttribute('style', originalStyles);
+    wrapper.classList.remove('swiper');
+  };
+
+  // Tablet and Desktop: 3 columns with vertical marquee
+  mm.add(CONFIG.breakpoints.tabletUp, () => {
+    resetToOriginal();
+    
+    const $wrapper = $(wrapper);
     const $items = $wrapper.children();
+    
     $wrapper.css({
       display: 'grid',
       gridTemplateColumns: 'repeat(3, 1fr)',
@@ -64,6 +84,7 @@ function initTestimonialLoop(mm) {
     const $cols = [0, 1, 2].map(() => $('<div class="testi-col">').appendTo($wrapper));
     $items.each((i, el) => $cols[i % 3].append(el));
 
+    const tweens = [];
     $cols.forEach(($col, i) => {
       $col.append($col.children().clone(true));
       const isMiddle = i === 1;
@@ -75,57 +96,76 @@ function initTestimonialLoop(mm) {
         duration: CONFIG.marqueeSpeed,
         repeat: -1,
       });
+      tweens.push(tween);
 
       // Pause only this column on hover
       $col.on('mouseenter', () => tween.pause());
       $col.on('mouseleave', () => tween.resume());
     });
+
+    // Return cleanup function for matchMedia
+    return () => {
+      tweens.forEach(t => t.kill());
+    };
   });
 
-  // Mobile: Horizontal auto-scrolling marquee
+  // Mobile: Swiper with 1 slide, bullets below
   mm.add(CONFIG.breakpoints.mobile, () => {
-    const $wrapper = $('[data-testimonials]');
-    if (!$wrapper.length) return;
+    resetToOriginal();
 
-    const $items = $wrapper.children();
-    if ($items.length < 2) return;
+    // Guard: Swiper must be loaded
+    if (typeof Swiper === 'undefined') {
+      console.warn('[SAW] Swiper not loaded for testimonials');
+      return;
+    }
 
-    // Set up wrapper as horizontal scroll container
-    $wrapper.css({
-      display: 'flex',
-      flexWrap: 'nowrap',
-      overflow: 'hidden',
-      gap: '1rem',
+    const items = Array.from(wrapper.children);
+    if (items.length < 1) return;
+
+    // Build Swiper structure
+    wrapper.classList.add('swiper');
+    wrapper.style.cssText = 'overflow: hidden; position: relative; display: block;';
+
+    const swiperWrapper = document.createElement('div');
+    swiperWrapper.className = 'swiper-wrapper';
+    swiperWrapper.style.cssText = 'display: flex; flex-direction: row; width: 100%; height: auto; box-sizing: content-box;';
+
+    items.forEach(child => {
+      child.classList.add('swiper-slide');
+      // Force slide styling
+      child.style.cssText = 'flex-shrink: 0; width: 100%; height: auto; position: relative; display: block;';
+      swiperWrapper.appendChild(child);
+    });
+    wrapper.appendChild(swiperWrapper);
+
+    // Create pagination container
+    const pagination = document.createElement('div');
+    pagination.className = 'swiper-pagination';
+    // Remove custom inline positioning to respect user's CSS (absolute bottom)
+    wrapper.appendChild(pagination);
+
+    // Force Swiper wrapper styles - add padding-bottom to ensure space for bullets if CSS loads late
+    wrapper.style.cssText = 'overflow: hidden; position: relative; display: block; padding-bottom: 40px;';
+    swiperWrapper.style.cssText = 'display: flex; flex-direction: row; width: 100%; height: auto; box-sizing: content-box;';
+
+    // Initialize Swiper
+    swiperInstance = new Swiper(wrapper, {
+      slidesPerView: 1,
+      spaceBetween: 16,
+      loop: true,
+      pagination: {
+        el: pagination,
+        clickable: true,
+      },
     });
 
-    // Set items to fixed width
-    $items.css({
-      flex: '0 0 85%',
-      maxWidth: '85%',
-    });
-
-    // Clone items for seamless loop
-    $items.clone().appendTo($wrapper);
-
-    // Calculate total width of all items
-    const itemCount = $items.length;
-    const itemWidth = $items.eq(0).outerWidth(true);
-    const totalWidth = itemWidth * itemCount;
-
-    // Animate horizontal scroll
-    const tween = gsap.to($wrapper.children(), {
-      x: -totalWidth,
-      duration: itemCount * 6, // 6 seconds per item
-      ease: 'none',
-      repeat: -1,
-      modifiers: {
-        x: gsap.utils.unitize(x => parseFloat(x) % totalWidth)
+    // Return cleanup function for matchMedia
+    return () => {
+      if (swiperInstance) {
+        swiperInstance.destroy(true, true);
+        swiperInstance = null;
       }
-    });
-
-    // Pause on hover/touch, resume on leave
-    $wrapper.on('mouseenter touchstart', () => tween.pause());
-    $wrapper.on('mouseleave touchend', () => tween.resume());
+    };
   });
 }
 

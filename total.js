@@ -155,12 +155,16 @@ function initTestimonialLoop(mm) {
 			const isMiddle = i === 1;
 			if (isMiddle) gsap.set($col, { yPercent: -50 });
 
-			gsap.to($col, {
+			const tween = gsap.to($col, {
 				yPercent: isMiddle ? 0 : -50,
 				ease: 'none',
 				duration: CONFIG.marqueeSpeed,
 				repeat: -1,
 			});
+
+			// Pause only this column on hover
+			$col.on('mouseenter', () => tween.pause());
+			$col.on('mouseleave', () => tween.resume());
 		});
 	});
 }

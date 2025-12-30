@@ -64,9 +64,6 @@ function initTestimonialLoop(mm) {
     const $cols = [0, 1, 2].map(() => $('<div class="testi-col">').appendTo($wrapper));
     $items.each((i, el) => $cols[i % 3].append(el));
 
-    // Store tweens for pause/resume
-    const tweens = [];
-
     $cols.forEach(($col, i) => {
       $col.append($col.children().clone(true));
       const isMiddle = i === 1;
@@ -78,12 +75,11 @@ function initTestimonialLoop(mm) {
         duration: CONFIG.marqueeSpeed,
         repeat: -1,
       });
-      tweens.push(tween);
-    });
 
-    // Pause on hover, resume on leave
-    $wrapper.on('mouseenter', () => tweens.forEach(t => t.pause()));
-    $wrapper.on('mouseleave', () => tweens.forEach(t => t.resume()));
+      // Pause only this column on hover
+      $col.on('mouseenter', () => tween.pause());
+      $col.on('mouseleave', () => tween.resume());
+    });
   });
 
   // Mobile: Horizontal auto-scrolling marquee

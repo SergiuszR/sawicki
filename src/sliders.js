@@ -138,7 +138,15 @@ function initServicesSlider() {
   wrappers.forEach(wrapper => {
     const pane = wrapper.closest(".w-tab-pane");
     const items = wrapper.querySelectorAll(".w-dyn-item");
-    if (!pane || !items.length) return;
+    // Only require items, pane is optional now
+    if (!items.length) return;
+
+    // Helper to check if we should play/draw
+    const isActive = () => {
+      // If inside a tab, must be active tab. If standalone, always "active" (logic-wise).
+      // We also check for visibility (offsetParent) to avoid running when hidden (e.g. strict display:none)
+      return (!pane || pane.classList.contains("w--tab-active")) && wrapper.offsetParent !== null;
+    };
 
     const LINE_DURATION = 2.0, SWITCH_DURATION = 0.5, END_DELAY = 3.0;
     let activeIndex = 0, timerTween = null, transitionTween = null;
@@ -158,8 +166,8 @@ function initServicesSlider() {
 
     const draw = (val) => {
       if (typeof val !== 'number') val = activeIndex;
-      // Guard: If tab is not active or wrapper hidden, calculation will fail (return 0s)
-      if (!pane.classList.contains("w--tab-active") || wrapper.offsetParent === null) return;
+      // Guard: If not active or hidden
+      if (!isActive()) return;
       
       const wRect = wrapper.getBoundingClientRect();
       const dots = Array.from(items).map(i => i.querySelector('[data-step="decor"]'));
@@ -182,7 +190,7 @@ function initServicesSlider() {
       gsap.set(progress, { x: startX, y: startY, height: currH });
     };
 
-    // Clear all active states (for inactive tabs)
+    // Clear all active states (reset to clean slate)
     const clearAll = () => {
       activeIndex = 0;
       items.forEach((it) => {
@@ -191,11 +199,11 @@ function initServicesSlider() {
         it.querySelector('[data-step="decor"]')?.classList.remove("is-active");
         it.querySelector("h4")?.classList.remove("is-active");
       });
-      // Also reset lines visually
       gsap.set(track, { height: 0 });
       gsap.set(progress, { height: 0 });
     };
 
+    // Activate Step 0 specifically
     const activateStepZero = () => {
       activeIndex = 0;
       items.forEach((it, i) => {
@@ -213,8 +221,7 @@ function initServicesSlider() {
     };
 
     const play = () => {
-      // Strict guard
-      if (!pane.classList.contains("w--tab-active")) return;
+      if (!isActive()) return;
       if (timerTween) timerTween.kill();
       
       const targetVal = activeIndex >= items.length - 1 ? items.length : activeIndex + 1;
@@ -224,11 +231,11 @@ function initServicesSlider() {
         val: targetVal, duration: LINE_DURATION, ease: "linear",
         onUpdate: () => draw(obj.val),
         onComplete: () => {
-          if (!pane.classList.contains("w--tab-active")) return;
+          if (!isActive()) return;
 
           if (activeIndex >= items.length - 1) {
             gsap.delayedCall(END_DELAY, () => {
-              if (pane.classList.contains("w--tab-active")) {
+              if (isActive()) {
                 resetSwitch(); 
               }
             });
@@ -240,9 +247,8 @@ function initServicesSlider() {
       if (IS_HOVERING_SERVICES) timerTween.pause();
     };
 
-    // Reset loop animation (visually reset to 0 then play)
     const resetSwitch = () => {
-        if (!pane.classList.contains("w--tab-active")) return;
+        if (!isActive()) return;
         if (timerTween) timerTween.kill();
         if (transitionTween) transitionTween.kill();
         
@@ -252,7 +258,7 @@ function initServicesSlider() {
         const tl = gsap.timeline({
             onUpdate: () => draw(0),
             onComplete: () => {
-                 if (pane.classList.contains("w--tab-active")) play();
+                 if (isActive()) play();
             }
         });
 
@@ -267,9 +273,8 @@ function initServicesSlider() {
         transitionTween = tl;
     };
 
-
     const switchStep = (idx) => {
-      if (!pane.classList.contains("w--tab-active")) return;
+      if (!isActive()) return;
       if (timerTween) timerTween.kill();
       if (transitionTween) transitionTween.kill();
       
@@ -285,7 +290,7 @@ function initServicesSlider() {
       const tl = gsap.timeline({ 
         onUpdate: () => draw(activeIndex),
         onComplete: () => { 
-            if (pane.classList.contains("w--tab-active")) play();
+            if (isActive()) play();
         } 
       });
       
@@ -301,14 +306,12 @@ function initServicesSlider() {
     };
 
     const start = () => {
-      stop(); // Ensure clean state (kill previous)
-      
-      // Wait for layout to be applied (display: block)
+      stop(); 
       requestAnimationFrame(() => {
-         if (pane.classList.contains("w--tab-active")) {
-             activateStepZero(); // Set step 0 active
-             draw(0);            // Draw line at 0
-             play();             // Start
+         if (isActive()) {
+             activateStepZero(); 
+             draw(0);            
+             play();             
          }
       });
     };
@@ -317,23 +320,26 @@ function initServicesSlider() {
     wrapper.addEventListener("mouseleave", () => { IS_HOVERING_SERVICES = false; timerTween?.play(); });
     items.forEach((it, i) => {
       const h = it.querySelector('[data-step="header"]');
-      if (h) { h.style.cursor = "pointer"; h.addEventListener("click", () => i !== activeIndex && pane.classList.contains("w--tab-active") && switchStep(i)); }
+      if (h) { h.style.cursor = "pointer"; h.addEventListener("click", () => i !== activeIndex && isActive() && switchStep(i)); }
     });
     window.addEventListener("resize", () => {
-        if (pane.classList.contains("w--tab-active")) draw(activeIndex);
+        if (isActive()) draw(activeIndex);
     });
 
-    new MutationObserver(() => {
-      if (pane.classList.contains("w--tab-active")) { 
-        start(); 
-      } else { 
-        stop(); 
-      }
-    }).observe(pane, { attributes: true, attributeFilter: ["class"] });
+    // Check visibility/tabs
+    if (pane) {
+      new MutationObserver(() => {
+        if (isActive()) { 
+          start(); 
+        } else { 
+          stop(); 
+        }
+      }).observe(pane, { attributes: true, attributeFilter: ["class"] });
+    }
 
-    // Init: Check if already active
-    clearAll(); // Default to clear
-    if (pane.classList.contains("w--tab-active")) {
+    // Initialize
+    clearAll(); 
+    if (isActive()) {
         start();
     }
   });

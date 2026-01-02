@@ -17,16 +17,15 @@ export function initAnimations(mm) {
   });
 
   // 2. Fade & Split Text
-  // 2. Fade & Split Text
-  // $('[data-fade-in], [data-split-text]').each(function () {
-  //   const $el = $(this);
-  //   const tl = gsap.timeline({ scrollTrigger: { trigger: $el, start: 'top 95%', toggleActions: 'play none none none' } });
-  //   if ($el.is('[data-fade-in]')) tl.from($el, { opacity: 0, y: 40, duration: CONFIG.animationDuration, delay: 0.1, ease: 'power3.out' }, 0);
-  //   if ($el.is('[data-split-text]') && typeof SplitText !== 'undefined') {
-  //     const split = new SplitText($el, { type: 'lines,words' });
-  //     tl.from(split.words, { opacity: 0, y: 25, duration: 1.2, stagger: 0.08, ease: 'power3.out', delay: 0.1 }, 0);
-  //   }
-  // });
+  $('[data-fade-in], [data-split-text]').each(function () {
+    const $el = $(this);
+    const tl = gsap.timeline({ scrollTrigger: { trigger: $el, start: 'top 95%', toggleActions: 'play none none none' } });
+    if ($el.is('[data-fade-in]')) tl.from($el, { opacity: 0, y: 40, duration: CONFIG.animationDuration, delay: 0.1, ease: 'power3.out' }, 0);
+    if ($el.is('[data-split-text]') && typeof SplitText !== 'undefined') {
+      const split = new SplitText($el, { type: 'lines,words' });
+      tl.from(split.words, { opacity: 0, y: 25, duration: 1.2, stagger: 0.08, ease: 'power3.out', delay: 0.1 }, 0);
+    }
+  });
 
   // 3. Grid Stagger
   $('[data-grid]').each(function () {

@@ -20,7 +20,7 @@ const init = () => {
         return;
     }
     
-    console.log('[SAW] Initializing...');
+
 
     const mm = gsap.matchMedia();
 

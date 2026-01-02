@@ -573,7 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const allModals = document.querySelectorAll('[data-modal]');
   const closeButtons = document.querySelectorAll('.modal_close-button');
   
-  console.log(triggers, wrapper, allModals, closeButtons);
+
   // Helper: Close logic
   const closeWrapper = () => {
     if (wrapper) wrapper.classList.remove('show');

@@ -124,16 +124,26 @@ function initTestimonialLoop(mm) {
 
     // Build Swiper structure
     wrapper.classList.add('swiper');
-    wrapper.style.cssText = 'overflow: hidden; position: relative; display: block;';
+    wrapper.style.overflow = 'hidden';
+    wrapper.style.position = 'relative';
+    wrapper.style.display = 'block';
 
     const swiperWrapper = document.createElement('div');
     swiperWrapper.className = 'swiper-wrapper';
-    swiperWrapper.style.cssText = 'display: flex; flex-direction: row; width: 100%; height: auto; box-sizing: content-box;';
+    swiperWrapper.style.display = 'flex';
+    swiperWrapper.style.flexDirection = 'row';
+    swiperWrapper.style.width = '100%';
+    swiperWrapper.style.height = 'auto';
+    swiperWrapper.style.boxSizing = 'content-box';
 
     items.forEach(child => {
       child.classList.add('swiper-slide');
       // Force slide styling
-      child.style.cssText = 'flex-shrink: 0; width: 100%; height: auto; position: relative; display: block;';
+      child.style.flexShrink = '0';
+      child.style.width = '100%';
+      child.style.height = 'auto';
+      child.style.position = 'relative';
+      child.style.display = 'block';
       swiperWrapper.appendChild(child);
     });
     wrapper.appendChild(swiperWrapper);
@@ -145,8 +155,16 @@ function initTestimonialLoop(mm) {
     wrapper.appendChild(pagination);
 
     // Force Swiper wrapper styles - add padding-bottom to ensure space for bullets if CSS loads late
-    wrapper.style.cssText = 'overflow: hidden; position: relative; display: block; padding-bottom: 40px;';
-    swiperWrapper.style.cssText = 'display: flex; flex-direction: row; width: 100%; height: auto; box-sizing: content-box;';
+    // Force Swiper wrapper styles - add padding-bottom to ensure space for bullets if CSS loads late
+    wrapper.style.overflow = 'hidden';
+    wrapper.style.position = 'relative';
+    wrapper.style.display = 'block';
+    wrapper.style.paddingBottom = '40px';
+    swiperWrapper.style.display = 'flex';
+    swiperWrapper.style.flexDirection = 'row';
+    swiperWrapper.style.width = '100%';
+    swiperWrapper.style.height = 'auto';
+    swiperWrapper.style.boxSizing = 'content-box';
 
     // Initialize Swiper
     swiperInstance = new Swiper(wrapper, {

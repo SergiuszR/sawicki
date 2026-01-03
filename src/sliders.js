@@ -61,8 +61,14 @@ function initTestimonialLoop(mm) {
       swiperInstance = null;
     }
     wrapper.innerHTML = originalHTML;
-    wrapper.setAttribute('style', originalStyles);
+    // Clear all inline styles and restore originals
+    wrapper.removeAttribute('style');
+    if (originalStyles) wrapper.setAttribute('style', originalStyles);
     wrapper.classList.remove('swiper');
+    // Ensure no leftover height/overflow constraints
+    wrapper.style.height = '';
+    wrapper.style.overflow = '';
+    wrapper.style.display = '';
   };
 
   // Tablet and Desktop: 3 columns with vertical marquee
@@ -109,8 +115,9 @@ function initTestimonialLoop(mm) {
     };
   });
 
-  // Mobile: Swiper with 1 slide, bullets below
-  mm.add(CONFIG.breakpoints.mobile, () => {
+  // Mobile ONLY (below 768px): Swiper with 1 slide, bullets below
+  // Using explicit breakpoint to avoid overlap with tabletUp
+  mm.add('(max-width: 767px)', () => {
     resetToOriginal();
 
     // Guard: Swiper must be loaded

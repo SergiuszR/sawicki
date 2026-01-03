@@ -3,6 +3,25 @@ export function initTOC() {
   const lists = document.querySelectorAll('[data-toc="list"]');
   if (!contents || lists.length === 0) return;
 
+  // Helper: slugify text for URL-friendly IDs
+  function slugify(text) {
+    return text
+      .toString()
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')        // Replace spaces with -
+      .replace(/[^\w-]+/g, '')     // Remove non-word chars (except -)
+      .replace(/--+/g, '-')        // Replace multiple - with single -
+      .replace(/^-+/, '')          // Trim - from start
+      .replace(/-+$/, '');         // Trim - from end
+  }
+
+  // Helper: get scroll offset based on viewport
+  function getScrollOffset() {
+    const isMobile = window.innerWidth < 768;
+    return isMobile ? 120 : 120; // 120px offset for both (navbar ~106px + buffer)
+  }
+
   // 1. Get Title (H1)
   const h1 = contents.querySelector('.blog-post-header_title-wrapper h1');
   
@@ -18,10 +37,34 @@ export function initTOC() {
   if (!headings.length) return;
 
   // 4. Build List with Hierarchy Classes
-  // Assign IDs first
-  headings.forEach((h, i) => {
-    h.id = `toc-${i}`;
+  // Assign slugified IDs based on heading text and apply scroll margin
+  const usedIds = new Set();
+  
+  function applyScrollMargins() {
+    const offset = getScrollOffset();
+    headings.forEach((h) => {
+      h.style.scrollMarginTop = `${offset}px`;
+    });
+  }
+  
+  headings.forEach((h) => {
+    let baseSlug = slugify(h.textContent);
+    if (!baseSlug) baseSlug = 'section';
+    
+    // Ensure unique IDs
+    let slug = baseSlug;
+    let counter = 1;
+    while (usedIds.has(slug)) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+    usedIds.add(slug);
+    h.id = slug;
   });
+  
+  // Apply scroll margins initially and on resize
+  applyScrollMargins();
+  window.addEventListener('resize', applyScrollMargins);
 
   // Populate all lists
   lists.forEach(list => {
@@ -31,6 +74,7 @@ export function initTOC() {
       link.href = `#${h.id}`;
       link.className = `toc_link is-${h.tagName.toLowerCase()}`; // Adds .is-h1, .is-h2
       link.textContent = h.textContent.trim();
+      link.setAttribute('data-lenis-prevent', ''); // Prevent Lenis from intercepting
       list.appendChild(link);
     });
   });
@@ -58,7 +102,8 @@ export function initTOC() {
 
   headings.forEach(h => observer.observe(h));
 
-  // 6. Smart Scroll Handler (for all lists)
+  // 6. Click Handler (for all lists)
+  // Uses scrollIntoView which respects scroll-margin-top CSS
   lists.forEach(list => {
     list.addEventListener('click', e => {
       const link = e.target.closest('a');
@@ -69,16 +114,11 @@ export function initTOC() {
       const target = document.getElementById(id);
       
       if (target) {
-        // Manual offset calculation (Header height + Buffer)
-        const offset = 120; 
-        const elementPosition = target.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.scrollY - offset;
-    
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: "smooth"
-        });
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Update URL hash without triggering scroll
+        history.pushState(null, '', `#${id}`);
       }
     });
   });
 }
+

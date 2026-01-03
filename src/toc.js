@@ -8,7 +8,7 @@ export function initTOC() {
   
   // 2. Get Content Headings (H2, H3) in order
   const richText = contents.querySelector('.blog-post-content_content');
-  const contentHeadings = richText ? richText.querySelectorAll('h2, h3') : [];
+  const contentHeadings = richText ? richText.querySelectorAll('h2') : [];
 
   // 3. Merge them
   const headings = [];

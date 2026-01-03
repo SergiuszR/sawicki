@@ -121,61 +121,81 @@ function initTestimonialLoop(mm) {
     resetToOriginal();
 
     // Guard: Swiper must be loaded
-    if (typeof Swiper === 'undefined') return;
+    if (typeof Swiper === 'undefined') {
+      console.warn('[SAW] Swiper not loaded for testimonials');
+      return;
+    }
 
     const items = Array.from(wrapper.children);
     if (items.length < 1) return;
 
-    // 1. Setup Container
+    // Build Swiper structure
     wrapper.classList.add('swiper');
+    // Use hidden to contain slides, but we need space for bullets if they are outside
+    // Typically bullets insdie container -> hidden is fine.
+    // If bullets outside, we usually need a container. 
+    // Here we put bullets absolute bottom.
+    wrapper.style.overflow = 'hidden'; 
     wrapper.style.position = 'relative';
     wrapper.style.display = 'block';
-    wrapper.style.overflow = 'hidden';
-    // Add padding for pagination
-    wrapper.style.paddingBottom = '40px'; 
+    wrapper.style.paddingBottom = '40px'; // Space for bullets
+    wrapper.style.boxSizing = 'border-box';
 
-    // 2. Setup Wrapper
     const swiperWrapper = document.createElement('div');
     swiperWrapper.className = 'swiper-wrapper';
-    // Swiper CSS usually handles this, but ensuring flex is safe
-    swiperWrapper.style.display = 'flex'; 
+    swiperWrapper.style.display = 'flex';
+    swiperWrapper.style.flexDirection = 'row';
     swiperWrapper.style.width = '100%';
-    swiperWrapper.style.height = '100%';
+    swiperWrapper.style.height = 'auto';
+    swiperWrapper.style.boxSizing = 'border-box';
     
-    // 3. Move items
+    // Ensure wrapper doesn't overflow horizontally
+    swiperWrapper.style.maxWidth = '100VW'; 
+
     items.forEach(child => {
       child.classList.add('swiper-slide');
-      child.style.width = '100%'; 
-      child.style.height = 'auto';
+      // Force slide styling
       child.style.flexShrink = '0';
+      child.style.width = '100%';
+      child.style.height = 'auto';
+      child.style.position = 'relative';
       child.style.display = 'block';
+      child.style.boxSizing = 'border-box';
+      child.style.maxWidth = '100%'; 
       swiperWrapper.appendChild(child);
     });
     wrapper.appendChild(swiperWrapper);
 
-    // 4. Pagination
+    // Create pagination container with explicit bottom positioning
     const pagination = document.createElement('div');
     pagination.className = 'swiper-pagination';
-    pagination.style.position = 'absolute';
-    pagination.style.bottom = '0';
-    pagination.style.left = '0';
-    pagination.style.width = '100%';
-    pagination.style.zIndex = '10';
-    pagination.style.textAlign = 'center';
+    
+    // Enforce styles with !important to override global defaults
+    pagination.style.setProperty('position', 'absolute', 'important');
+    pagination.style.setProperty('bottom', '0px', 'important');
+    pagination.style.setProperty('top', 'auto', 'important'); // Reset potential global top
+    pagination.style.setProperty('left', '0', 'important');
+    pagination.style.setProperty('right', '0', 'important');
+    pagination.style.setProperty('width', '100%', 'important');
+    pagination.style.setProperty('text-align', 'center', 'important');
+    pagination.style.setProperty('z-index', '10', 'important');
+    pagination.style.setProperty('transform', 'none', 'important'); // Reset potential global transform
+    
     wrapper.appendChild(pagination);
 
-    // 5. Init Swiper
+    // Initialize Swiper
     swiperInstance = new Swiper(wrapper, {
       slidesPerView: 1,
-      spaceBetween: 20, // Add some gap
+      spaceBetween: 16,
       loop: true,
-      autoHeight: true,
+      autoHeight: true, // Helps with content height
       pagination: {
         el: pagination,
         clickable: true,
       },
     });
 
+    // Return cleanup function for matchMedia
     return () => {
       if (swiperInstance) {
         swiperInstance.destroy(true, true);

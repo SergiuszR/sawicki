@@ -148,23 +148,32 @@ function initTestimonialLoop(mm) {
     });
     wrapper.appendChild(swiperWrapper);
 
-    // Create pagination container
+    // Create pagination container with explicit bottom positioning
     const pagination = document.createElement('div');
     pagination.className = 'swiper-pagination';
-    // Remove custom inline positioning to respect user's CSS (absolute bottom)
+    Object.assign(pagination.style, {
+      position: 'absolute',
+      bottom: '0',
+      left: '0',
+      right: '0',
+      width: '100%',
+      textAlign: 'center',
+      zIndex: '10',
+    });
     wrapper.appendChild(pagination);
 
-    // Force Swiper wrapper styles - add padding-bottom to ensure space for bullets if CSS loads late
-    // Force Swiper wrapper styles - add padding-bottom to ensure space for bullets if CSS loads late
-    wrapper.style.overflow = 'hidden';
+    // Force Swiper wrapper styles - add padding-bottom to ensure space for bullets
+    wrapper.style.overflow = 'visible';
     wrapper.style.position = 'relative';
     wrapper.style.display = 'block';
-    wrapper.style.paddingBottom = '40px';
+    wrapper.style.paddingBottom = '50px';
+    wrapper.style.height = 'auto';
     swiperWrapper.style.display = 'flex';
     swiperWrapper.style.flexDirection = 'row';
     swiperWrapper.style.width = '100%';
     swiperWrapper.style.height = 'auto';
     swiperWrapper.style.boxSizing = 'content-box';
+    swiperWrapper.style.overflow = 'visible';
 
     // Initialize Swiper
     swiperInstance = new Swiper(wrapper, {

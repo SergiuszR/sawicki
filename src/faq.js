@@ -77,7 +77,7 @@ function toggleAccordion(currentItem, faqItems) {
       decor.style.transform = 'translateX(-10px)';
     }
     if (plusIcon) plusIcon.style.opacity = '1';
-    if (questionText) questionText.style.fontWeight = '400';
+
   });
   
   // Open current if it was closed
@@ -91,7 +91,7 @@ function toggleAccordion(currentItem, faqItems) {
       currentDecor.style.transform = 'translateX(0)';
     }
     if (currentPlusIcon) currentPlusIcon.style.opacity = '0';
-    if (currentQuestionText) currentQuestionText.style.fontWeight = '500';
+
   }
 }
 

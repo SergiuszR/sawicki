@@ -131,9 +131,15 @@ function initTestimonialLoop(mm) {
 
     // Build Swiper structure
     wrapper.classList.add('swiper');
-    wrapper.style.overflow = 'hidden';
+    // Use hidden to contain slides, but we need space for bullets if they are outside
+    // Typically bullets insdie container -> hidden is fine.
+    // If bullets outside, we usually need a container. 
+    // Here we put bullets absolute bottom.
+    wrapper.style.overflow = 'hidden'; 
     wrapper.style.position = 'relative';
     wrapper.style.display = 'block';
+    wrapper.style.paddingBottom = '40px'; // Space for bullets
+    wrapper.style.boxSizing = 'border-box';
 
     const swiperWrapper = document.createElement('div');
     swiperWrapper.className = 'swiper-wrapper';
@@ -141,7 +147,10 @@ function initTestimonialLoop(mm) {
     swiperWrapper.style.flexDirection = 'row';
     swiperWrapper.style.width = '100%';
     swiperWrapper.style.height = 'auto';
-    swiperWrapper.style.boxSizing = 'content-box';
+    swiperWrapper.style.boxSizing = 'border-box';
+    
+    // Ensure wrapper doesn't overflow horizontally
+    swiperWrapper.style.maxWidth = '100VW'; 
 
     items.forEach(child => {
       child.classList.add('swiper-slide');
@@ -151,6 +160,8 @@ function initTestimonialLoop(mm) {
       child.style.height = 'auto';
       child.style.position = 'relative';
       child.style.display = 'block';
+      child.style.boxSizing = 'border-box';
+      child.style.maxWidth = '100%'; 
       swiperWrapper.appendChild(child);
     });
     wrapper.appendChild(swiperWrapper);
@@ -158,35 +169,26 @@ function initTestimonialLoop(mm) {
     // Create pagination container with explicit bottom positioning
     const pagination = document.createElement('div');
     pagination.className = 'swiper-pagination';
-    Object.assign(pagination.style, {
-      position: 'absolute',
-      bottom: '0',
-      left: '0',
-      right: '0',
-      width: '100%',
-      textAlign: 'center',
-      zIndex: '10',
-    });
+    
+    // Enforce styles with !important to override global defaults
+    pagination.style.setProperty('position', 'absolute', 'important');
+    pagination.style.setProperty('bottom', '0px', 'important');
+    pagination.style.setProperty('top', 'auto', 'important'); // Reset potential global top
+    pagination.style.setProperty('left', '0', 'important');
+    pagination.style.setProperty('right', '0', 'important');
+    pagination.style.setProperty('width', '100%', 'important');
+    pagination.style.setProperty('text-align', 'center', 'important');
+    pagination.style.setProperty('z-index', '10', 'important');
+    pagination.style.setProperty('transform', 'none', 'important'); // Reset potential global transform
+    
     wrapper.appendChild(pagination);
-
-    // Force Swiper wrapper styles - add padding-bottom to ensure space for bullets
-    wrapper.style.overflow = 'visible';
-    wrapper.style.position = 'relative';
-    wrapper.style.display = 'block';
-    wrapper.style.paddingBottom = '50px';
-    wrapper.style.height = 'auto';
-    swiperWrapper.style.display = 'flex';
-    swiperWrapper.style.flexDirection = 'row';
-    swiperWrapper.style.width = '100%';
-    swiperWrapper.style.height = 'auto';
-    swiperWrapper.style.boxSizing = 'content-box';
-    swiperWrapper.style.overflow = 'visible';
 
     // Initialize Swiper
     swiperInstance = new Swiper(wrapper, {
       slidesPerView: 1,
       spaceBetween: 16,
       loop: true,
+      autoHeight: true, // Helps with content height
       pagination: {
         el: pagination,
         clickable: true,
